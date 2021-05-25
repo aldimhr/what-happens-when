@@ -1,18 +1,17 @@
 What happens when...
 ====================
 
-This repository is an attempt to answer the age-old interview question "What
-happens when you type google.com into your browser's address box and press
-enter?"
+Repositori ini merupakan jawaban untuk pertanyaan "Apa yang terjadi ketika 
+mengetik google.com pada address box browser dan menekan enter?"
 
-Except instead of the usual story, we're going to try to answer this question
-in as much detail as possible. No skipping out on anything.
+Berbeda dengan cerita pada umumnya, kami akan menocba menjawab pertanyaan ini
+sedetail mungkin. Tidak boleh melewatkan apa pun.
 
-This is a collaborative process, so dig in and try to help out! There are tons
-of details missing, just waiting for you to add them! So send us a pull
-request, please!
+Ini merupakan proses kolaboratif, jadi gali dan coba bantu! Ada banyak
+sekali informasi detail yang belum ditulis, menunggu anda untuk
+menambahkannya! Jadi tolong kirimkan kami pull request!
 
-This is all licensed under the terms of the `Creative Commons Zero`_ license.
+Ini semua berlisensi dibawah persyarakan lisensi `Creative Commons Zero`_ license.
 
 Read this in `简体中文`_ (simplified Chinese), `日本語`_ (Japanese) and `한국어`_
 (Korean). NOTE: these have not been reviewed by the alex/what-happens-when
