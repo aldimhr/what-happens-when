@@ -11,7 +11,7 @@ Ini merupakan proses kolaboratif, jadi gali dan coba bantu! Ada banyak
 sekali informasi detail yang belum ditulis, menunggu anda untuk
 menambahkannya! Jadi tolong kirimkan kami pull request!
 
-Ini semua berlisensi dibawah persyarakan lisensi `Creative Commons Zero`_ license.
+Ini semua berlisensi dibawah persyaratan lisensi `Creative Commons Zero`_ license.
 
 Read this in `简体中文`_ (simplified Chinese), `日本語`_ (Japanese) and `한국어`_
 (Korean). NOTE: these have not been reviewed by the alex/what-happens-when
@@ -24,88 +24,88 @@ Table of Contents
    :backlinks: none
    :local:
 
-The "g" key is pressed
+Tombol "g" ditekan
 ----------------------
-The following sections explain the physical keyboard actions
-and the OS interrupts. When you press the key "g" the browser receives the
-event and the auto-complete functions kick in.
-Depending on your browser's algorithm and if you are in
-private/incognito mode or not various suggestions will be presented
-to you in the dropdown below the URL bar. Most of these algorithms sort
-and prioritize results based on search history, bookmarks, cookies, and
-popular searches from the internet as a whole. As you are typing
-"google.com" many blocks of code run and the suggestions will be refined
-with each keypress. It may even suggest "google.com" before you finish typing
-it.
+Pada bagian ini menjelaskan tidakan fisik pada keyboard dan OS INTERRUPTS. 
+Saat anda menekan tombol "g", browser menerima EVENT dan fungsi auto-complete dimulai.
+Bergantung pada algoritme browser anda dan apakah anda masuk mode 
+pribadi/penyamaran atau tidak, berbagai saran akan disajikan kepada anda
+di menu dropdown dibawah bilah URL. Sebagian besar algoritme ini
+menyortir dan memprioritaskan hasil berdasarkan riwayat penelusuran, bookmark,
+cookie, dan penelusuran populer dari internet secara keseluruhan.
+Saat anda mengetik "google.com", banyak blok kode yang dijalankan dan saran
+akan terus disempurnakan setiap penekanan tombol. Bahkan mungkin menyarankan
+"google.com" sebelum anda selesai mengetiknya.
 
-The "enter" key bottoms out
+Tombol "enter" selesai ditekan
 ---------------------------
 
-To pick a zero point, let's choose the Enter key on the keyboard hitting the
-bottom of its range. At this point, an electrical circuit specific to the enter
-key is closed (either directly or capacitively). This allows a small amount of
-current to flow into the logic circuitry of the keyboard, which scans the state
-of each key switch, debounces the electrical noise of the rapid intermittent
-closure of the switch, and converts it to a keycode integer, in this case 13.
-The keyboard controller then encodes the keycode for transport to the computer.
-This is now almost universally over a Universal Serial Bus (USB) or Bluetooth
-connection, but historically has been over PS/2 or ADB connections.
+Untuk mengambil titik nol, mari pilih tombol Enter pada keyboard yang
+menyentuh bagian paling bawah jangkauannya. Pada titik ini, rangkaian
+listrik khusus untuk tombol enter ditutup (baik secara langsung, atau
+secara kapasitif). Hal ini memungkinkan sejumlah kecil arus mengalir
+ke sirkuit logika keyboard, yang memindai status setiap key switch
+(tombol keyboard), menghilangkan gangguan listrik dari penutupan sakelar
+yang terputus-putus, dan mengubahnya menjadi keycode integer, dalam 
+hal ini 13. Pengontrol keyboard kemudian mengkodekan kode kunci untuk
+dikirim ke komputer. Saat ini secara universal melalui koneksi Universal
+Serial Bus (USB) atau Bluetooth, tetapi secara historis telah melalui
+PS/2 atau ADB.
 
-*In the case of the USB keyboard:*
+*Dalam kasus Keyboard USB:*
 
-- The USB circuitry of the keyboard is powered by the 5V supply provided over
-  pin 1 from the computer's USB host controller.
+- Sirkuit USB keyboard ditenagai dengan suplai 5V yang disediakan melalui 1 pin 
+  dari pengontrol host USB komputer.
 
-- The keycode generated is stored by internal keyboard circuitry memory in a
-  register called "endpoint".
+- Keycode yang dihasilkan disimpan oleh memori sirkuit keyboard internal dalam
+  register yang disebut "endpoint".
 
-- The host USB controller polls that "endpoint" every ~10ms (minimum value
-  declared by the keyboard), so it gets the keycode value stored on it.
+- Host pengontrol USB mengumpulkan "endpoint" setiap ~10ms (nilai minimum yang 
+  telah dinyatakan (declare) oleh keyboard), sehingga ia akan mendapat keycode 
+  yang disimpan di dalamnya.
 
-- This value goes to the USB SIE (Serial Interface Engine) to be converted in
-  one or more USB packets that follow the low-level USB protocol.
+- Nilai ini masuk ke USB SIE (Serial Interface Engine) untuk dikonversi dalam 
+  satu atau lebih paket USB yang mengikuti protokol USB low-level.
 
-- Those packets are sent by a differential electrical signal over D+ and D-
-  pins (the middle 2) at a maximum speed of 1.5 Mb/s, as an HID
-  (Human Interface Device) device is always declared to be a "low-speed device"
+- Paket-paket tersebut dikirim oleh sinyal listrik diferensial melalui pin D+
+  dan D- (tengah 2) dengan kecepatan maksimum 1,5 Mb/s, karena perangkat HID
+  (Human Interface Device) selalu dinyatakan sebagai "low-speed device"
   (USB 2.0 compliance).
 
-- This serial signal is then decoded at the computer's host USB controller, and
-  interpreted by the computer's Human Interface Device (HID) universal keyboard
-  device driver.  The value of the key is then passed into the operating
-  system's hardware abstraction layer.
+- Sinyal serial ini kemudian diterjemahkan ke host pengontrol USB komputer, dan
+  diinterpretasikan oleh driver perangkat keyboard universal Human Interface
+  Device (HID) komputer. Value dari key tersebut kemudian diteruskan ke lapisan
+  abstraksi perangkat keras sistem operasi.
 
-*In the case of Virtual Keyboard (as in touch screen devices):*
+*Dalam kasus Keyboard Virtual (seperti pada perangkat layar sentuh):*
 
-- When the user puts their finger on a modern capacitive touch screen, a
-  tiny amount of current gets transferred to the finger. This completes the
-  circuit through the electrostatic field of the conductive layer and
-  creates a voltage drop at that point on the screen. The
-  ``screen controller`` then raises an interrupt reporting the coordinate of
-  the keypress.
+- Saat pengguna meletakkan jarinya pada layar sentuh kapasitif modern,
+  sejumlah kecil arus akan ditransfer ke jari. Ini menyelesaikan rangkaian
+  melalui medan elektrostatis lapisan konduktif dan menciptakan penurunan
+  tegangan pada titik tersebut di layar. ``Screen controller`` kemudian
+  memunculkan interrupt yang melaporkan kordinat penekanan tombol.
 
-- Then the mobile OS notifies the currently focused application of a press event
-  in one of its GUI elements (which now is the virtual keyboard application
-  buttons).
+- Kemudian OS seluler memberi tahu aplikasi yang sedang difokuskan dari 
+  menekan event di salah satu elemen GUI-nya (yang sekarang adalah tombol
+  aplikasi keyboard virtual)
 
-- The virtual keyboard can now raise a software interrupt for sending a
-  'key pressed' message back to the OS.
+- Keyboard virtual sekarang dapat raise interrupt perangkat lunak
+  untuk mengirim pesan 'tombol ditekan' kembali ke OS.
 
-- This interrupt notifies the currently focused application of a 'key pressed'
-  event.
+- interrupt ini memberi tahu aplikasi yang sedang difokuskan dari event
+ 'tombol ditekan'
 
-
-Interrupt fires [NOT for USB keyboards]
+Interrupt fires [BUKAN untuk keyboard USB]
 ---------------------------------------
 
-The keyboard sends signals on its interrupt request line (IRQ), which is mapped
-to an ``interrupt vector`` (integer) by the interrupt controller. The CPU uses
-the ``Interrupt Descriptor Table`` (IDT) to map the interrupt vectors to
-functions (``interrupt handlers``) which are supplied by the kernel. When an
-interrupt arrives, the CPU indexes the IDT with the interrupt vector and runs
-the appropriate handler. Thus, the kernel is entered.
+Keyboard mengirimkan sinyal pada interrupt request line (IRQ), yang dipetakan
+ke ``interrupt vector`` (integer) oleh pengontrol interrupt. CPU menggunakan
+``Interrupt Descriptor Table`` (IDT) untuk memetakan vektor interrupt ke fungsi 
+(``interrupt handlers``) yang disediakan oleh kernel. Ketika interrupt tiba,
+CPU mengindeks IDT dengan vektor interrupt dan menjalankan penanganan yang sesuai.
+Jadi, kernel dimasukkan.
 
-(On Windows) A ``WM_KEYDOWN`` message is sent to the app
+(Di Windows) Pesan ``VM_KEYDOWN`` dikirim ke aplikasi.
 --------------------------------------------------------
 
 The HID transport passes the key down event to the ``KBDHID.sys`` driver which
