@@ -179,66 +179,65 @@ pencari bahwa itu berasal dari bilah URL browser tertentu.
 Ubah karakter Unicode non-ASCII di hostname
 ------------------------------------------------
 
-* The browser checks the hostname for characters that are not in ``a-z``,
-  ``A-Z``, ``0-9``, ``-``, or ``.``.
+* Browser memeriksa hostname untuk karakter yang tidak ada di ``a-z``,
+  ``A-Z``, ``0-9``, ``-``, atau ``.``.
 * Since the hostname is ``google.com`` there won't be any, but if there were
   the browser would apply `Punycode`_ encoding to the hostname portion of the
   URL.
 
-Check HSTS list
+Periksa daftar HSTS
 ---------------
-* The browser checks its "preloaded HSTS (HTTP Strict Transport Security)"
-  list. This is a list of websites that have requested to be contacted via
-  HTTPS only.
-* If the website is in the list, the browser sends its request via HTTPS
-  instead of HTTP. Otherwise, the initial request is sent via HTTP.
-  (Note that a website can still use the HSTS policy *without* being in the
-  HSTS list.  The first HTTP request to the website by a user will receive a
-  response requesting that the user only send HTTPS requests.  However, this
-  single HTTP request could potentially leave the user vulnerable to a
-  `downgrade attack`_, which is why the HSTS list is included in modern web
-  browsers.)
+
+* Browser memeriksa daftar "preloaded HSTS (HTTP Strict Transport
+  Security)". Ini merupakan daftar situs web yang hanya dihubungi melalui
+  HTTPS saja.
+* Jika situs web ada dalam daftar, browser mengirimkan permintaanya melalui HTTPS,
+  bukan HTTP. Jika tidak, permintaan awal dikirim melalui HTTP. 
+  (Perhatikan bahwa situs web tetap dapat menggunakan kebijakan HSTS *tanpa* berada 
+  dalam daftar HSTS. Permintaan HTTP pertama ke situs web oleh pengguna akan menerima 
+  respons yang meminta agar pengguna hanya mengirim permintaan HTTPS. Namun, permintaan 
+  HTTP tunggal ini berpotensi membuat pengguna rentan terhadap `downgrade attack`_,
+  itulah sebabnya daftar HSTS disertakan di browser web modern.)
 
 DNS lookup
 ----------
 
-* Browser checks if the domain is in its cache. (to see the DNS Cache in
-  Chrome, go to `chrome://net-internals/#dns <chrome://net-internals/#dns>`_).
-* If not found, the browser calls ``gethostbyname`` library function (varies by
-  OS) to do the lookup.
-* ``gethostbyname`` checks if the hostname can be resolved by reference in the
-  local ``hosts`` file (whose location `varies by OS`_) before trying to
-  resolve the hostname through DNS.
-* If ``gethostbyname`` does not have it cached nor can find it in the ``hosts``
-  file then it makes a request to the DNS server configured in the network
-  stack. This is typically the local router or the ISP's caching DNS server.
-* If the DNS server is on the same subnet the network library follows the
-  ``ARP process`` below for the DNS server.
-* If the DNS server is on a different subnet, the network library follows
-  the ``ARP process`` below for the default gateway IP.
+* Browser memeriksa apakah domain ada di cache-nya. (untuk melihat cache DNS di
+  Chrome, buka `chrome://net-internals/#dns <chrome://net-internals/#dns>`_).
+* Jika tidak ditemukan, browser akan memanggil fungsi pustaka ``gethostbyname``
+  (berbeda-beda tergantung OS) untuk melakukan pencarian.
+* ``gethostbyname`` memeriksa apakah hostname dapat diselesaikan dengan referensi
+  di file ``hosts`` (lokasinya ``bervariasi tergantung OS yang digunakan``) sebelum
+  mencoba menyelesaikan nama host melalui DNS.
+* Jika ``gethostbyname`` tidak memiliki cache atau dapat menemukan di file ``hosts``
+  maka dapat membuat permintaan ke server DNS yang dikonfigurasi di network stack.
+  Biasanya ini adalah router lokal atau server DNS cache ISP.
+* Jika server DNS berada di subnet yang sama, perpustakaan jaringan mengikuti di bawah
+  ``ARP process`` untuk server DNS.
+* Jika server DNS berada di subnet yang berbeda, network library mengikuti dibawah
+  ``ARP process`` untuk default dateway IP.
 
-
-ARP process
+Proses ARP
 -----------
 
-In order to send an ARP (Address Resolution Protocol) broadcast the network
-stack library needs the target IP address to lookup. It also needs to know the
-MAC address of the interface it will use to send out the ARP broadcast.
+Untuk mengirim ARP (Address Resolution Protocol) broadcast, network stack library
+memerlukan alamat IP target untuk dicari. Ini juga perlu mengetahua alamat MAC dari
+antarmuka yang akan digunakan untuk mengirimkan ARP broadcast.
 
-The ARP cache is first checked for an ARP entry for our target IP. If it is in
-the cache, the library function returns the result: Target IP = MAC.
+Cache ARP pertama kali diperiksa untuk entri ARP untuk IP target. Jika berada
+di cache, fungsi library mengebalikan hasil: Target IP = MAC.
 
-If the entry is not in the ARP cache:
+Jika entri tidak ada di cache ARP:
 
-* The route table is looked up, to see if the Target IP address is on any of
-  the subnets on the local route table. If it is, the library uses the
-  interface associated with that subnet. If it is not, the library uses the
-  interface that has the subnet of our default gateway.
+* Route table dicari, untuk melihat apakah alamat IP Target ada di salah satu subnet
+  di route table lokal. Jika iya, pustaka menggunakan antarmuka yang terkait dengan
+  subnet itu. Jika tidak, perpustakaan menggunakan antarmuka yang memiliki subnet 
+  gateway default.
 
-* The MAC address of the selected network interface is looked up.
+* Alamat MAC di antarmuka jaringan yang dipilih akan dicari.
 
-* The network library sends a Layer 2 (data link layer of the `OSI model`_)
-  ARP request:
+* Network library mengirimkan permintaan ARP Layer 2 (data link
+  layer dari `OSI model`_):
 
 ``ARP Request``::
 
@@ -247,31 +246,31 @@ If the entry is not in the ARP cache:
     Target MAC: FF:FF:FF:FF:FF:FF (Broadcast)
     Target IP: target.ip.goes.here
 
-Depending on what type of hardware is between the computer and the router:
+Bergantung pada jenis perangkat keras antara komputer dan router:
 
-Directly connected:
+Terhubung langsung:
 
-* If the computer is directly connected to the router the router response
-  with an ``ARP Reply`` (see below)
+* Jika komputer terhubung langsung ke router, respons router dengan ``ARP Reply``
+  (lihat dibawah)
 
 Hub:
 
-* If the computer is connected to a hub, the hub will broadcast the ARP
-  request out of all other ports. If the router is connected on the same "wire",
-  it will respond with an ``ARP Reply`` (see below).
+* Jika komputer terhubung ke hub, hub akan mengirimkan permintaan ARP dari semua
+  port lainnya. Jika router terhubung pada "kabel" yang sama, router akan merespons
+  dengan ``ARP Reply`` (lihat di bawah).
 
 Switch:
 
-* If the computer is connected to a switch, the switch will check its local
-  CAM/MAC table to see which port has the MAC address we are looking for. If
-  the switch has no entry for the MAC address it will rebroadcast the ARP
-  request to all other ports.
+* Jika komputer terhubung ke sakelar, sakelar akan memeriksa CAM/MAC table lokalnya
+  untuk melihat port mana yang memiliki alamat MAC yang kita cari. Jika sakelar
+  tidak memiliki entri untuk alamat MAC, maka akan rebroadcast ARP request ke
+  semua port lainnya.
 
-* If the switch has an entry in the MAC/CAM table it will send the ARP request
-  to the port that has the MAC address we are looking for.
+* Jika sakelar memiliki entri di MAC/CAM table, ia akan mengirim permintaan ARP
+  ke port yang memiliki alamat MAC yang kita cari.
 
-* If the router is on the same "wire", it will respond with an ``ARP Reply``
-  (see below)
+* Jika router menggunakan "kabel" yang sama, router akan merespons dengan ``ARP Reply``
+  (lihat di bawah).
 
 ``ARP Reply``::
 
@@ -280,85 +279,80 @@ Switch:
     Target MAC: interface:mac:address:here
     Target IP: interface.ip.goes.here
 
-Now that the network library has the IP address of either our DNS server or
-the default gateway it can resume its DNS process:
+Sekarang pustaka jaringan memiliki alamat IP baik dari server DNS atau gateway
+default anda, ia dapat melanjutkan proses DNS-nya:
 
-* The DNS client establishes a socket to UDP port 53 on the DNS server,
-  using a source port above 1023.
-* If the response size is too large, TCP will be used instead.
-* If the local/ISP DNS server does not have it, then a recursive search is
-  requested and that flows up the list of DNS servers until the SOA is reached,
-  and if found an answer is returned.
+* DNS client membuat soket ke port UDP 53 di server DNS, menggunakan port sumber
+  diatas 1023.
+* Jika ukuran respons terlalu besar, TCP akan digunakan.
+* Jika server DNS local / ISP tidak memiliki, maka pencarian rekursif diminta dan
+  itu mengalir ke atas daftar server DNS sampai SOA tercapai, dan jika ditemukan
+  jawaban maka akan dikembalikan.
 
 Opening of a socket
 -------------------
-Once the browser receives the IP address of the destination server, it takes
-that and the given port number from the URL (the HTTP protocol defaults to port
-80, and HTTPS to port 443), and makes a call to the system library function
-named ``socket`` and requests a TCP socket stream - ``AF_INET/AF_INET6`` and
-``SOCK_STREAM``.
+Setelah browser menerima alamat IP dari server tujuan, ia akan mengambilnya dan
+nomor port yang diberikan dari URL (protokol HTTP default ke port 80, dan HTTPS
+ke port 433), dan membuat panggilan ke fungsi perpustakaan sistem bernama ``socket``
+dan meminta aliran soket TCP - ``AF_INET/AF_INET6`` dan ``SOCK_STREAM``.
 
-* This request is first passed to the Transport Layer where a TCP segment is
-  crafted. The destination port is added to the header, and a source port is
-  chosen from within the kernel's dynamic port range (ip_local_port_range in
-  Linux).
-* This segment is sent to the Network Layer, which wraps an additional IP
-  header. The IP address of the destination server as well as that of the
-  current machine is inserted to form a packet.
-* The packet next arrives at the Link Layer. A frame header is added that
-  includes the MAC address of the machine's NIC as well as the MAC address of
-  the gateway (local router). As before, if the kernel does not know the MAC
-  address of the gateway, it must broadcast an ARP query to find it.
+* Permintaan ini pertama kali diteruskan ke Transport Layer tempat segmen TCP dibuat.
+  Port tujuan ditambahkan ke header, dan port sumber dipilih dari dalam kisaran port
+  dinamis kernel (ip_local_port_range in Linux).
+* Segmen ini dikirim ke Network Layer, yang membungkus header IP tambahan. Alamat IP
+  dari server tujuan serta mesin saay ini dimasukkan untuk membentuk sebuah paket.
+* Paket selanjutnya tiba di Link Layer. Sebuah header bingkai ditambahkan yang menyertakan
+  alamat MAC dari gateway (router lokal). Seperti sebelumnya, jika kernel tidak mengetahui
+  alamat MAC dari gateway, kernal harus broadcast kuery ARP untuk menemukannya.
 
-At this point the packet is ready to be transmitted through either:
+Pada titik ini paket siap untuk dikirim melalui:
 
 * `Ethernet`_
 * `WiFi`_
 * `Cellular data network`_
 
-For most home or small business Internet connections the packet will pass from
-your computer, possibly through a local network, and then through a modem
-(MOdulator/DEModulator) which converts digital 1's and 0's into an analog
-signal suitable for transmission over telephone, cable, or wireless telephony
-connections. On the other end of the connection is another modem which converts
-the analog signal back into digital data to be processed by the next `network
-node`_ where the from and to addresses would be analyzed further.
+Untuk sebagian besar koneksi internet rumahan atau bisnis kecil, paket akan melewati
+komputer anda, mungkin melalui jaringan lokal, dan kemudian memalui modem (MOdulator / 
+DEMolator) yang mengubah 1 dan 0 digital menjadi sinyal analog yang cocok untuk transmisi
+melalui telepon, kabel, atau koneksi telepon nirkabel. Di ujung lain koneksi adalam modem
+lain yang mengubah sinyal analog kembali menjadi data digital untuk di proses oleh `network
+node`_ berikutnya dimana alamat dari dan ke akan dianalisis lebih lanjut.
 
-Most larger businesses and some newer residential connections will have fiber
-or direct Ethernet connections in which case the data remains digital and
-is passed directly to the next `network node`_ for processing.
+Sebagian besar bisnis yang lebih besar dan beberapa koneksi perumahan yang lebih baru
+akan memiliki koneksi fiber atau Ethernet langsung, dalam hal ini datanya tetap digital
+dan diteruskan langsung ke `network node`_ berikutnya untuk di proses.
 
-Eventually, the packet will reach the router managing the local subnet. From
-there, it will continue to travel to the autonomous system's (AS) border
-routers, other ASes, and finally to the destination server. Each router along
-the way extracts the destination address from the IP header and routes it to
-the appropriate next hop. The time to live (TTL) field in the IP header is
-decremented by one for each router that passes. The packet will be dropped if
-the TTL field reaches zero or if the current router has no space in its queue
-(perhaps due to network congestion).
+Akhirnya, paket tersebut akan mencapai router yang mengelola subnet lokal.
+Dari sana, ia akan terus melakukan perjalanan ke router autonomous system's (AS) border, 
+ASes lainnya, dan terakhir ke server tujuan. Setiap router di sepanjang
+jalan mengekstrak alamat tujuan dari header IP dan mengarahkannya ke hop berikutnya
+yang sesuai. Kolom Time to Live (TTL) di header IP dikurangi satu untuk setiap router
+lewat. Paket akan dihapus jika bidang TTL mencapai nol atau jika router saat ini
+tidak memiliki ruang dalam antriannya (mungkin karena kemacetan jaringan).
 
-This send and receive happens multiple times following the TCP connection flow:
+Pengiriman dan penerimaan ini terjadi beberapa kali setelah aliran koneksi TCP:
 
-* Client chooses an initial sequence number (ISN) and sends the packet to the
-  server with the SYN bit set to indicate it is setting the ISN
-* Server receives SYN and if it's in an agreeable mood:
-   * Server chooses its own initial sequence number
-   * Server sets SYN to indicate it is choosing its ISN
-   * Server copies the (client ISN +1) to its ACK field and adds the ACK flag
-     to indicate it is acknowledging receipt of the first packet
-* Client acknowledges the connection by sending a packet:
-   * Increases its own sequence number
-   * Increases the receiver acknowledgment number
-   * Sets ACK field
-* Data is transferred as follows:
-   * As one side sends N data bytes, it increases its SEQ by that number
-   * When the other side acknowledges receipt of that packet (or a string of
-     packets), it sends an ACK packet with the ACK value equal to the last
-     received sequence from the other
-* To close the connection:
-   * The closer sends a FIN packet
-   * The other sides ACKs the FIN packet and sends its own FIN
-   * The closer acknowledges the other side's FIN with an ACK
+* Klien memilih initial sequence number (ISN) dan mengirim paket ke server
+  dengan SYN bit set untuk menunjukkan pengaturan dari ISN.
+* Server menerima SYN dan jika sedang dalam mood yang menyenangkan:
+   * Server memilih nomor urut awalnya sendiri
+   * Server menyetel SYN untuk menunjukkan ia memilih ISN-nya
+   * Server menyalin (client ISN +1) ke ACK field dan menambahkan ACK flag
+     untuk menunjukkan bahwa menerima paket pertama
+* Klien acknowledges koneksi dengan mengirimkan paket:
+   * Meningkatkan nomor urutnya sendiri
+   * Meningkatkan receiver acknowledgment number
+   * Setel ACK field
+* Data ditransfer sebagai berikut:
+   * Saat satu sisi mengirimkan N byte data, ia akan menginkatkan SEQ-nya dengan
+     angka itu.
+   * Ketika pihal lain acknowledges penerimaan paket itu (atau serangkaian paket),
+     ia akan mengirimkan paket ACK dengan nilai ACK sama dengan urutan yang 
+     diterima terkahir dari yang lain.
+* Untuk menutup koneksi:
+   * Semakin dekat mengirimkan paket FIN
+   * Sisi lain ACK paket FIN dan mengirimkan FIN-nya sendiri
+   * Semakin dekat acknowledges FIM pihak lain dengan ACK
 
 TLS handshake
 -------------
