@@ -92,8 +92,7 @@ PS/2 atau ADB.
 - Keyboard virtual sekarang dapat raise interrupt perangkat lunak
   untuk mengirim pesan 'tombol ditekan' kembali ke OS.
 
-- interrupt ini memberi tahu aplikasi yang sedang difokuskan dari event
- 'tombol ditekan'
+- interrupt ini memberi tahu aplikasi yang sedang difokuskan dari event 'tombol ditekan'
 
 Interrupt fires [BUKAN untuk keyboard USB]
 ---------------------------------------
@@ -108,81 +107,76 @@ Jadi, kernel dimasukkan.
 (Di Windows) Pesan ``VM_KEYDOWN`` dikirim ke aplikasi.
 --------------------------------------------------------
 
-The HID transport passes the key down event to the ``KBDHID.sys`` driver which
-converts the HID usage into a scancode. In this case, the scan code is
-``VK_RETURN`` (``0x0D``). The ``KBDHID.sys`` driver interfaces with the
-``KBDCLASS.sys`` (keyboard class driver). This driver is responsible for
-handling all keyboard and keypad input in a secure manner. It then calls into
-``Win32K.sys`` (after potentially passing the message through 3rd party
-keyboard filters that are installed). This all happens in kernel mode.
+HID transport melewati key down event ke ``KBDHID.sys`` driver yang mengubah
+penggunaan HID menjadi scancode. Dalam hal ini, scancode adalah ``VK_RETURN`` (``0x0D``).
+Driver interface ``KBDHID.sys`` berinteraksi dengan ``KBDCLASS.sys`` (keyboard class driver). 
+Driver ini menangani semua input keyboard dan keypad dengan cara yang aman.
+Kemudian hal tersebut akan memanggil ``Win32K.sys`` (setelah berpotensi menyampaikan
+pesan melalui filter keyboard pihak ketiga yang diinstal). Ini semua terjadi
+dalam mode kernel.
 
-``Win32K.sys`` figures out what window is the active window through the
-``GetForegroundWindow()`` API. This API provides the window handle of the
-browser's address box. The main Windows "message pump" then calls
-``SendMessage(hWnd, WM_KEYDOWN, VK_RETURN, lParam)``. ``lParam`` is a bitmask
-that indicates further information about the keypress: repeat count (0 in this
-case), the actual scan code (can be OEM dependent, but generally wouldn't be
-for ``VK_RETURN``), whether extended keys (e.g. alt, shift, ctrl) were also
-pressed (they weren't), and some other state.
+``Win32K.sys`` mencari tahu window apa yang merupakan window aktif melalui
+API ``GetForegroundWindow()``. API ini menyediakan window handle dari kotak
+alamat browser. Window utama "message pump" kemudian memanggil 
+``SendMessage(hWnd, WM_KEYDOWN, VK_RETURN, lParam)``. ``lParam`` merupakan 
+bitmask yang menunjukkan informasi lebih lanjut tentang penekanan tombol:
+repeat count (0 dalam hal ini), scancode (dapat bergantung pada OEM, tetapi
+umumnya tidak untuk ``VK_RETURN``), baik tombol yang extended (alt, shift, ctrl)
+juga ditekan (), dan beberapa status lainnya.
 
-The Windows ``SendMessage`` API is a straightforward function that
-adds the message to a queue for the particular window handle (``hWnd``).
-Later, the main message processing function (called a ``WindowProc``) assigned
-to the ``hWnd`` is called in order to process each message in the queue.
+API window ``SendMessage`` adalah fungsi langsung yang menambahkan pesan ke 
+antrian untuk window handle (``hWnd``). Kemudian, fungsi pemrosesan pesan utama
+(disebut ``WindowProc``) dipanggil untuk memproses setiap pesan dalam antrian.
 
-The window (``hWnd``) that is active is actually an edit control and the
-``WindowProc`` in this case has a message handler for ``WM_KEYDOWN`` messages.
-This code looks within the 3rd parameter that was passed to ``SendMessage``
-(``wParam``) and, because it is ``VK_RETURN`` knows the user has hit the ENTER
-key.
+Window (``hWnd``) yang aktif sebenarnya adalah kontrol edit dan ``WindowProc``
+dalam hal ini memiliki penanganan pesan untuk pesan ``WM_KEYDOWN``. Kode ini 
+mencari di dalam parameter ke-3 yang diteruskan ke ``SendMessage`` (``wParam``)
+dan, karena ``VK_RETURN`` tahu pengguna telah menekan tombol ENTER.
 
-(On OS X) A ``KeyDown`` NSEvent is sent to the app
+(Di OS X) NSEvent ``KeyDown`` dikirim ke aplikasi
 --------------------------------------------------
 
-The interrupt signal triggers an interrupt event in the I/O Kit kext keyboard
-driver. The driver translates the signal into a key code which is passed to the
-OS X ``WindowServer`` process. Resultantly, the ``WindowServer`` dispatches an
-event to any appropriate (e.g. active or listening) applications through their
-Mach port where it is placed into an event queue. Events can then be read from
-this queue by threads with sufficient privileges calling the
-``mach_ipc_dispatch`` function. This most commonly occurs through, and is
-handled by, an ``NSApplication`` main event loop, via an ``NSEvent`` of
-``NSEventType`` ``KeyDown``.
+Sinyal interrupt memicu kejadian interrupt event pada driver keyboard I/O Kit Kex.
+Driver menerjemahkan sinyal menjadi keycode yang diteruskan ke proses OS X ``WindowServer``.
+Akibatnya, ``WindowServer`` mengirimkan acara ke aplikasi yang sesuai (misalnya aktif atau listening)
+melalui port Mach mereka di mana ia ditempatkan ke dalam antrian event. Event kemudian dapat
+dibaca dari antrian ini oleh threads dengan sufficient privileges memanggil fungsi ``mach_ipc_dispatch``.
+Hal ini paling sering terjadi occurs, dan ditangai oleh loop event utama ``NSApplication``, melalui 
+``NSEvent`` dari ``NSEventType`` ``KeyDown``.
 
-(On GNU/Linux) the Xorg server listens for keycodes
+(Pada GNU / Linux) server Xorg mendengarkan keycodes
 ---------------------------------------------------
 
-When a graphical ``X server`` is used, ``X`` will use the generic event
-driver ``evdev`` to acquire the keypress. A re-mapping of keycodes to scancodes
-is made with ``X server`` specific keymaps and rules.
-When the scancode mapping of the key pressed is complete, the ``X server``
-sends the character to the ``window manager`` (DWM, metacity, i3, etc), so the
-``window manager`` in turn sends the character to the focused window.
-The graphical API of the window  that receives the character prints the
-appropriate font symbol in the appropriate focused field.
+Ketika grafik ``X server`` digunakan, ``X`` akan menggunakan driver event generik
+``evdev`` untuk mendapatkan penekanan tombol. Pemetaan ulang keycodes ke scancodes
+dibuat dengan peta kunci dan aturan khusus ``X server``. Ketika pemetaan scancode
+dari tombol yang ditekan selesai, ``X server`` mengirim karakter ke ``window manager``
+paga gilirannya mengirim karakter ke window yang difokuskan. API grafis dari window
+yang menerima karakter mencetak simbol font yang sesuai di bidang fokus yang sesuai.
 
 Parse URL
 ---------
 
-* The browser now has the following information contained in the URL (Uniform
+* Browser sekarang memiliki informasi berikut ini di URL (Uniform
   Resource Locator):
 
     - ``Protocol``  "http"
-        Use 'Hyper Text Transfer Protocol'
+        Menggunakan 'Hyper Text Transfer Protocol'
 
     - ``Resource``  "/"
         Retrieve main (index) page
 
 
-Is it a URL or a search term?
+Apakah itu URL atau search term?
 -----------------------------
 
-When no protocol or valid domain name is given the browser proceeds to feed
-the text given in the address box to the browser's default web search engine.
-In many cases the URL has a special piece of text appended to it to tell the
-search engine that it came from a particular browser's URL bar.
+Ketika tidak ada protocol atau nama domain yang valid diberikan,
+browser melanjutkan untuk memasukkan teks yang dierikan dalam kotak
+ke mesin pencari web default browser. Dalam banyak kasus, URL memiliki
+bagian teks khusus yang ditambahkan padanya untuk memberi tahu mesin
+pencari bahwa itu berasal dari bilah URL browser tertentu.
 
-Convert non-ASCII Unicode characters in the hostname
+Ubah karakter Unicode non-ASCII di hostname
 ------------------------------------------------
 
 * The browser checks the hostname for characters that are not in ``a-z``,
